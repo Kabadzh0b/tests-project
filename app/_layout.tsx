@@ -1,10 +1,11 @@
-import { Stack, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
+import { Text } from "react-native";
 
 export default function RootLayout() {
   return (
-    <Tabs>
-      <Tabs.Screen name="players" />
-      <Tabs.Screen name="index" />
+    <Tabs screenOptions={{ headerRight: () => <Text>Right</Text> }}>
+      <Tabs.Screen name="players" options={{ title: "Players" }} />
+      <Tabs.Screen name="index" options={{ title: "Games" }} />
     </Tabs>
   );
 }
