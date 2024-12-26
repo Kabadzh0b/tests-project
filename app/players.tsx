@@ -14,11 +14,6 @@ import {
 } from "react-native-gesture-handler";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
-// const playerData = [
-//   { id: "1", name: "Player 1", metrics: [100, 50, 150, 200, 300] },
-//   { id: "2", name: "Player 2", metrics: [200, 75, 275, 150, 250] },
-//   { id: "3", name: "Player 3", metrics: [150, 60, 210, 100, 180] },
-// ];
 
 type Player = {
   id: string;
@@ -28,12 +23,38 @@ type Player = {
 };
 
 const PlayersMetricsTable = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState<boolean | string>(false);
   const players: Player[] = JSON.parse(localStorage.getItem("players") || "[]");
+  const [playerNameValue, setPlayerNameValue] = useState<string>("");
+  console.log("players", players);
+
+  const handleSavePlayer = () => {
+    console.log("modalVisible", modalVisible);
+    if (modalVisible === true) {
+      const newPlayer = {
+        id: new Date().getTime().toString(),
+        name: playerNameValue,
+        deposit: 0,
+        withdraw: 0,
+      };
+      localStorage.setItem("players", JSON.stringify([...players, newPlayer]));
+      setModalVisible(false);
+      return;
+    }
+
+    const newPlayers = players.map((p) => {
+      if (p.id === modalVisible) {
+        return { ...p, name: playerNameValue };
+      }
+      return p;
+    });
+    localStorage.setItem("players", JSON.stringify(newPlayers));
+    setModalVisible(false);
+  };
+
   return (
     <ScrollView horizontal style={styles.container}>
       <View style={styles.container}>
-        {/* Header Row */}
         <View style={styles.row}>
           <View style={[styles.headerCell, styles.headerCell]}>
             <Text style={styles.headerText}>Player Name</Text>
@@ -56,14 +77,11 @@ const PlayersMetricsTable = () => {
           </Pressable>
         </View>
 
-        {/* Players Data */}
         {players.map((player) => (
           <View key={player.id} style={styles.row}>
-            {/* Fixed Player Name Column */}
             <View style={[styles.headerCell, styles.playerNameCell]}>
               <Text style={styles.playerNameText}>{player.name}</Text>
             </View>
-            {/* Player Metrics */}
             <View style={styles.metricCell}>
               <Text style={styles.metricText}>{player.deposit}</Text>
             </View>
@@ -77,14 +95,14 @@ const PlayersMetricsTable = () => {
             </View>
             <Pressable
               style={styles.headerCell}
-              onPress={() => setModalVisible(true)}
+              onPress={() => setModalVisible(player.id)}
             >
               <Text style={styles.metricText}>Edit</Text>
             </Pressable>
           </View>
         ))}
       </View>
-      <Modal visible={modalVisible} transparent animationType="slide">
+      <Modal visible={!!modalVisible} transparent animationType="slide">
         <View
           style={{
             flex: 1,
@@ -108,13 +126,15 @@ const PlayersMetricsTable = () => {
             }}
           >
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              Edit Player
+              {modalVisible === true ? "Create New" : "Edit"} Player
             </Text>
             <View style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Text style={{ fontSize: 16, fontWeight: "bold" }}>
                 Player Name
               </Text>
               <TextInput
+                value={playerNameValue}
+                onChangeText={(text) => setPlayerNameValue(text)}
                 style={{ fontSize: 16, fontWeight: "bold" }}
                 placeholder="Enter player name"
               />
@@ -129,6 +149,7 @@ const PlayersMetricsTable = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onPress={handleSavePlayer}
               >
                 <Text style={{ color: "#fff", fontSize: 16 }}>Save</Text>
               </Pressable>
@@ -141,13 +162,9 @@ const PlayersMetricsTable = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onPress={() => setModalVisible(false)}
               >
-                <Text
-                  style={{ color: "#fff", fontSize: 16 }}
-                  onPress={() => setModalVisible(false)}
-                >
-                  Cancel
-                </Text>
+                <Text style={{ color: "#fff", fontSize: 16 }}>Cancel</Text>
               </Pressable>
             </View>
           </View>
