@@ -24,12 +24,14 @@ type Player = {
 
 const PlayersMetricsTable = () => {
   const [modalVisible, setModalVisible] = useState<boolean | string>(false);
-  const players: Player[] = JSON.parse(localStorage.getItem("players") || "[]");
+  const fetchedPlayers: Player[] = JSON.parse(
+    localStorage.getItem("players") || "[]"
+  );
+  // state for rerendering the table
+  const [players, setPlayers] = useState<Player[]>(fetchedPlayers);
   const [playerNameValue, setPlayerNameValue] = useState<string>("");
-  console.log("players", players);
 
   const handleSavePlayer = () => {
-    console.log("modalVisible", modalVisible);
     if (modalVisible === true) {
       const newPlayer = {
         id: new Date().getTime().toString(),
@@ -38,6 +40,7 @@ const PlayersMetricsTable = () => {
         withdraw: 0,
       };
       localStorage.setItem("players", JSON.stringify([...players, newPlayer]));
+      setPlayers([...players, newPlayer]);
       setModalVisible(false);
       return;
     }
@@ -49,6 +52,14 @@ const PlayersMetricsTable = () => {
       return p;
     });
     localStorage.setItem("players", JSON.stringify(newPlayers));
+    setPlayers(newPlayers);
+    setModalVisible(false);
+  };
+
+  const handleDeletePlayer = (playerId: string) => {
+    const newPlayers = players.filter((p) => p.id !== playerId);
+    localStorage.setItem("players", JSON.stringify(newPlayers));
+    setPlayers(newPlayers);
     setModalVisible(false);
   };
 
@@ -93,12 +104,30 @@ const PlayersMetricsTable = () => {
                 {player.withdraw - player.deposit}
               </Text>
             </View>
-            <Pressable
-              style={styles.headerCell}
-              onPress={() => setModalVisible(player.id)}
+            <View
+              style={[
+                styles.headerCell,
+                { display: "flex", flexDirection: "row", gap: 10 },
+              ]}
             >
-              <Text style={styles.metricText}>Edit</Text>
-            </Pressable>
+              <Pressable
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: "#fff",
+                  },
+                ]}
+                onPress={() => setModalVisible(player.id)}
+              >
+                <Text style={styles.metricText}>Edit</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button, { backgroundColor: "#FF5555" }]}
+                onPress={() => handleDeletePlayer(player.id)}
+              >
+                <Text style={styles.metricText}>Delete</Text>
+              </Pressable>
+            </View>
           </View>
         ))}
       </View>
@@ -182,6 +211,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   row: {
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -207,6 +237,7 @@ const styles = StyleSheet.create({
     minWidth: 100,
     justifyContent: "center",
     alignItems: "center",
+    height: "100%",
     padding: 10,
     borderRightWidth: 1,
     borderRightColor: "#ccc",
@@ -221,6 +252,16 @@ const styles = StyleSheet.create({
   },
   metricText: {
     textAlign: "center",
+  },
+  button: {
+    borderRadius: 5,
+    padding: 10,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#000",
+    borderWidth: 1,
+    flex: 1,
   },
 });
 
