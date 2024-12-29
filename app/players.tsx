@@ -1,3 +1,4 @@
+import { PLAYER_KEY } from "../constants";
 import React, { useState } from "react";
 import {
   View,
@@ -25,7 +26,7 @@ type Player = {
 const PlayersMetricsTable = () => {
   const [modalVisible, setModalVisible] = useState<boolean | string>(false);
   const fetchedPlayers: Player[] = JSON.parse(
-    localStorage.getItem("players") || "[]"
+    localStorage.getItem(PLAYER_KEY) || "[]"
   );
   // state for rerendering the table
   const [players, setPlayers] = useState<Player[]>(fetchedPlayers);
@@ -39,7 +40,7 @@ const PlayersMetricsTable = () => {
         deposit: 0,
         withdraw: 0,
       };
-      localStorage.setItem("players", JSON.stringify([...players, newPlayer]));
+      localStorage.setItem(PLAYER_KEY, JSON.stringify([...players, newPlayer]));
       setPlayers([...players, newPlayer]);
       setModalVisible(false);
       return;
@@ -51,14 +52,14 @@ const PlayersMetricsTable = () => {
       }
       return p;
     });
-    localStorage.setItem("players", JSON.stringify(newPlayers));
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
     setPlayers(newPlayers);
     setModalVisible(false);
   };
 
   const handleDeletePlayer = (playerId: string) => {
     const newPlayers = players.filter((p) => p.id !== playerId);
-    localStorage.setItem("players", JSON.stringify(newPlayers));
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
     setPlayers(newPlayers);
     setModalVisible(false);
   };
