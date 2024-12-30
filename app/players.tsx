@@ -2,7 +2,7 @@ import { PLAYER_KEY } from "../constants";
 import React, { useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Modal } from "react-native";
 import { Pressable, TextInput } from "react-native-gesture-handler";
-import { Player } from "./index";
+import { Player } from "src/types";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
 
