@@ -6,19 +6,71 @@ import { Pressable, TextInput } from "react-native-gesture-handler";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
 
-type Player = {
-  id: string;
+type GamePlayerInput = {
+  playerId: string;
   name: string;
   deposit: number;
   withdraw: number;
 };
 
-type Game = {
+type GamePlayer = GamePlayerInput & { gameId: string };
+
+type Player = {
   id: string;
   name: string;
-  players: Player[];
-  description: string;
+  games: GamePlayer[];
+};
+
+type Game = {
+  id: string;
+  players: GamePlayer[];
+  deposit: number;
+  withdraw: number;
   comission: number;
+  date: Date;
+};
+
+const updatePlayers = (
+  players: Player[],
+  game: Game,
+  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>
+) => {
+  const gamePlayers = game.players;
+  players.map((p) => {
+    for (const gamePlayer of gamePlayers) {
+      if (p.id === gamePlayer.playerId) {
+        p.games.push(gamePlayer);
+      }
+    }
+  });
+  localStorage.setItem(PLAYER_KEY, JSON.stringify(players));
+  setPlayers([...players]);
+};
+
+const getGame = (enteredPlayers: GamePlayerInput[]) => {
+  const gameDeposit = enteredPlayers.reduce(
+    (acc, player) => acc + player.deposit,
+    0
+  );
+  const gameWithdraw = enteredPlayers.reduce(
+    (acc, player) => acc + player.withdraw,
+    0
+  );
+  const gameComission = gameDeposit - gameWithdraw;
+
+  const newGameId = new Date().getTime().toString();
+  const newGamePlayers = enteredPlayers.map((p) => {
+    return { ...p, gameId: newGameId };
+  });
+  const newGame: Game = {
+    id: newGameId,
+    players: newGamePlayers,
+    deposit: gameDeposit,
+    withdraw: gameWithdraw,
+    comission: gameComission,
+    date: new Date(),
+  };
+  return newGame;
 };
 
 const GamesTable = () => {
@@ -33,39 +85,37 @@ const GamesTable = () => {
 
   // state for rerendering the table
   const [players, setPlayers] = useState<Player[]>(fetchedPlayers);
-  const [playerNameValue, setPlayerNameValue] = useState<string>("");
+  const [games, setGames] = useState<Game[]>(fetchedGames);
 
-  const [enteredPlayers, setEnteredPlayers] = useState<Player[]>([...players]);
+  const [enteredPlayers, setEnteredPlayers] = useState<GamePlayerInput[]>([]);
 
   const handleSaveGame = () => {
     if (modalVisible === true) {
-      const newPlayer = {
-        id: new Date().getTime().toString(),
-        name: playerNameValue,
-        deposit: 0,
-        withdraw: 0,
-      };
-      localStorage.setItem(PLAYER_KEY, JSON.stringify([...players, newPlayer]));
-      setPlayers([...players, newPlayer]);
+      const newGame = getGame(enteredPlayers);
+      updatePlayers(players, newGame, setPlayers);
+      localStorage.setItem(GAME_KEY, JSON.stringify([...games, newGame]));
+      setGames([...games, newGame]);
       setModalVisible(false);
       return;
     }
 
-    const newPlayers = players.map((p) => {
-      if (p.id === modalVisible) {
-        return { ...p, name: playerNameValue };
-      }
-      return p;
-    });
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
-    setPlayers(newPlayers);
-    setModalVisible(false);
+    // const prevGames = games.filter((game) => game.id !== modalVisible);
+    // const newGame = getGame(enteredPlayers);
+    // updatePlayers(players, newGame, setPlayers);
+    // localStorage.setItem(GAME_KEY, JSON.stringify([...games, newGame]));
+    // setGames([...prevGames, newGame]);
+    // setModalVisible(false);
   };
 
-  const handleDeleteGame = (playerId: string) => {
-    const newPlayers = players.filter((p) => p.id !== playerId);
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
-    setPlayers(newPlayers);
+  const handleDeleteGame = (gameId: string) => {
+    const newGames = games.filter((game) => game.id !== gameId);
+    localStorage.setItem(GAME_KEY, JSON.stringify(newGames));
+    players.map((p) => {
+      const newPlayerGames = p.games.filter((game) => game.gameId !== gameId);
+      return { ...p, games: newPlayerGames };
+    });
+    setPlayers([...players]);
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(players));
     setModalVisible(false);
   };
 
@@ -94,20 +144,20 @@ const GamesTable = () => {
           </Pressable>
         </View>
 
-        {players.map((player) => (
-          <View key={player.id} style={styles.row}>
+        {games.map((game) => (
+          <View key={game.id} style={styles.row}>
             <View style={[styles.headerCell, styles.playerNameCell]}>
-              <Text style={styles.playerNameText}>{player.name}</Text>
+              <Text style={styles.playerNameText}>{game.date.toString()}</Text>
             </View>
             <View style={styles.metricCell}>
-              <Text style={styles.metricText}>{player.deposit}</Text>
+              <Text style={styles.metricText}>{game.deposit}</Text>
             </View>
             <View style={styles.metricCell}>
-              <Text style={styles.metricText}>{player.withdraw}</Text>
+              <Text style={styles.metricText}>{game.withdraw}</Text>
             </View>
             <View style={styles.metricCell}>
               <Text style={styles.metricText}>
-                {player.withdraw - player.deposit}
+                {game.withdraw - game.deposit}
               </Text>
             </View>
             <View
@@ -123,13 +173,13 @@ const GamesTable = () => {
                     backgroundColor: "#fff",
                   },
                 ]}
-                onPress={() => setModalVisible(player.id)}
+                onPress={() => setModalVisible(game.id)}
               >
                 <Text style={styles.metricText}>Edit</Text>
               </Pressable>
               <Pressable
                 style={[styles.button, { backgroundColor: "#FF5555" }]}
-                onPress={() => handleDeleteGame(player.id)}
+                onPress={() => handleDeleteGame(game.id)}
               >
                 <Text style={styles.metricText}>Delete</Text>
               </Pressable>
@@ -177,7 +227,7 @@ const GamesTable = () => {
               </View>
             </View>
             {enteredPlayers.map((player) => (
-              <View key={player.id} style={styles.row}>
+              <View key={player.playerId} style={styles.row}>
                 <View style={[styles.headerCell, styles.playerNameCell]}>
                   <Picker
                     style={styles.playerNameText}
@@ -185,7 +235,9 @@ const GamesTable = () => {
                     onValueChange={(itemValue) => {
                       setEnteredPlayers(
                         enteredPlayers.map((p) =>
-                          p.id === player.id ? { ...p, name: itemValue } : p
+                          p.playerId === player.playerId
+                            ? { ...p, name: itemValue }
+                            : p
                         )
                       );
                     }}
@@ -205,7 +257,7 @@ const GamesTable = () => {
                       }
                       setEnteredPlayers(
                         enteredPlayers.map((p) =>
-                          p.id === player.id
+                          p.playerId === player.playerId
                             ? { ...p, deposit: Number(text) }
                             : p
                         )
@@ -225,7 +277,7 @@ const GamesTable = () => {
                       }
                       setEnteredPlayers(
                         enteredPlayers.map((p) =>
-                          p.id === player.id
+                          p.playerId === player.playerId
                             ? { ...p, withdraw: Number(text) }
                             : p
                         )
