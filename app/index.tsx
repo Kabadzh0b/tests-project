@@ -3,25 +3,26 @@ import { PLAYER_KEY, GAME_KEY } from "../constants";
 import React, { useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Modal } from "react-native";
 import { Pressable, TextInput } from "react-native-gesture-handler";
+import dayjs from "dayjs";
 
-const headerMetrics = ["Deposit", "Withdraw", "Summary"];
+const headerMetrics = ["Deposit", "Withdraw", "Comission"];
 
-type GamePlayerInput = {
+export type GamePlayerInput = {
   playerId: string;
   name: string;
   deposit: number;
   withdraw: number;
 };
 
-type GamePlayer = GamePlayerInput & { gameId: string };
+export type GamePlayer = GamePlayerInput & { gameId: string };
 
-type Player = {
+export type Player = {
   id: string;
   name: string;
   games: GamePlayer[];
 };
 
-type Game = {
+export type Game = {
   id: string;
   players: GamePlayer[];
   deposit: number;
@@ -110,12 +111,13 @@ const GamesTable = () => {
   const handleDeleteGame = (gameId: string) => {
     const newGames = games.filter((game) => game.id !== gameId);
     localStorage.setItem(GAME_KEY, JSON.stringify(newGames));
-    players.map((p) => {
+    setGames([...newGames]);
+    const newPlayers = players.map((p) => {
       const newPlayerGames = p.games.filter((game) => game.gameId !== gameId);
       return { ...p, games: newPlayerGames };
     });
-    setPlayers([...players]);
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(players));
+    setPlayers([...newPlayers]);
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
     setModalVisible(false);
   };
 
@@ -124,7 +126,7 @@ const GamesTable = () => {
       <View style={styles.container}>
         <View style={styles.row}>
           <View style={[styles.headerCell, styles.headerCell]}>
-            <Text style={styles.headerText}>Player Name</Text>
+            <Text style={styles.headerText}>Date</Text>
           </View>
           {headerMetrics.map((metric, index) => (
             <View key={index} style={styles.headerCell}>
@@ -147,7 +149,9 @@ const GamesTable = () => {
         {games.map((game) => (
           <View key={game.id} style={styles.row}>
             <View style={[styles.headerCell, styles.playerNameCell]}>
-              <Text style={styles.playerNameText}>{game.date.toString()}</Text>
+              <Text style={styles.playerNameText}>
+                {dayjs(game.date).format("DD/MM/YYYY")}
+              </Text>
             </View>
             <View style={styles.metricCell}>
               <Text style={styles.metricText}>{game.deposit}</Text>
@@ -157,7 +161,7 @@ const GamesTable = () => {
             </View>
             <View style={styles.metricCell}>
               <Text style={styles.metricText}>
-                {game.withdraw - game.deposit}
+                {game.deposit - game.withdraw}
               </Text>
             </View>
             <View
@@ -315,6 +319,27 @@ const GamesTable = () => {
               <View style={styles.metricCell}>
                 <Text style={styles.metricText}></Text>
               </View>
+            </View>
+            <View style={styles.row}>
+              <Pressable
+                style={[styles.button, { width: "100%" }]}
+                onPress={() => {
+                  if (players.length <= 0) {
+                    return;
+                  }
+                  setEnteredPlayers([
+                    ...enteredPlayers,
+                    {
+                      playerId: players[0].id,
+                      name: players[0].name,
+                      deposit: 0,
+                      withdraw: 0,
+                    },
+                  ]);
+                }}
+              >
+                <Text style={styles.metricText}>Add New Player</Text>
+              </Pressable>
             </View>
             {/* // TODO: make a helper functions */}
             <View style={{ display: "flex", flexDirection: "column", gap: 10 }}>

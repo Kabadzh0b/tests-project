@@ -1,27 +1,10 @@
 import { PLAYER_KEY } from "../constants";
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  Modal,
-} from "react-native";
-import {
-  Pressable,
-  TextInput,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { View, Text, ScrollView, StyleSheet, Modal } from "react-native";
+import { Pressable, TextInput } from "react-native-gesture-handler";
+import { Player } from "./index";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
-
-type Player = {
-  id: string;
-  name: string;
-  deposit: number;
-  withdraw: number;
-};
 
 const PlayersMetricsTable = () => {
   const [modalVisible, setModalVisible] = useState<boolean | string>(false);
@@ -37,8 +20,7 @@ const PlayersMetricsTable = () => {
       const newPlayer = {
         id: new Date().getTime().toString(),
         name: playerNameValue,
-        deposit: 0,
-        withdraw: 0,
+        games: [],
       };
       localStorage.setItem(PLAYER_KEY, JSON.stringify([...players, newPlayer]));
       setPlayers([...players, newPlayer]);
@@ -89,48 +71,57 @@ const PlayersMetricsTable = () => {
           </Pressable>
         </View>
 
-        {players.map((player) => (
-          <View key={player.id} style={styles.row}>
-            <View style={[styles.headerCell, styles.playerNameCell]}>
-              <Text style={styles.playerNameText}>{player.name}</Text>
-            </View>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricText}>{player.deposit}</Text>
-            </View>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricText}>{player.withdraw}</Text>
-            </View>
-            <View style={styles.metricCell}>
-              <Text style={styles.metricText}>
-                {player.withdraw - player.deposit}
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.headerCell,
-                { display: "flex", flexDirection: "row", gap: 10 },
-              ]}
-            >
-              <Pressable
+        {players.map((player) => {
+          const playerDeposit = player.games.reduce(
+            (acc, game) => acc + game.deposit,
+            0
+          );
+          const playerWithdraw = player.games.reduce(
+            (acc, game) => acc + game.withdraw,
+            0
+          );
+          const playerStatus = playerDeposit - playerWithdraw;
+          return (
+            <View key={player.id} style={styles.row}>
+              <View style={[styles.headerCell, styles.playerNameCell]}>
+                <Text style={styles.playerNameText}>{player.name}</Text>
+              </View>
+              <View style={styles.metricCell}>
+                <Text style={styles.metricText}>{playerDeposit}</Text>
+              </View>
+              <View style={styles.metricCell}>
+                <Text style={styles.metricText}>{playerWithdraw}</Text>
+              </View>
+              <View style={styles.metricCell}>
+                <Text style={styles.metricText}>{playerStatus}</Text>
+              </View>
+              <View
                 style={[
-                  styles.button,
-                  {
-                    backgroundColor: "#fff",
-                  },
+                  styles.headerCell,
+                  { display: "flex", flexDirection: "row", gap: 10 },
                 ]}
-                onPress={() => setModalVisible(player.id)}
               >
-                <Text style={styles.metricText}>Edit</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.button, { backgroundColor: "#FF5555" }]}
-                onPress={() => handleDeletePlayer(player.id)}
-              >
-                <Text style={styles.metricText}>Delete</Text>
-              </Pressable>
+                <Pressable
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor: "#fff",
+                    },
+                  ]}
+                  onPress={() => setModalVisible(player.id)}
+                >
+                  <Text style={styles.metricText}>Edit</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, { backgroundColor: "#FF5555" }]}
+                  onPress={() => handleDeletePlayer(player.id)}
+                >
+                  <Text style={styles.metricText}>Delete</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
       <Modal visible={!!modalVisible} transparent animationType="slide">
         <View
