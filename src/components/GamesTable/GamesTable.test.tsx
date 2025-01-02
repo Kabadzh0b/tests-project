@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import GamesTable from "./GamesTable"; // Update this with the actual path
+import GamesTable from "./GamesTable";
 import { GameRow } from "../GameRow/GameRow";
 
 describe("GamesTable Component", () => {
