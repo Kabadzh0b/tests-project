@@ -16,12 +16,12 @@ export const usePlayerStore = create<PlayerStore>()(
   persist(
     (set) => ({
       players: [],
-      setPlayers: (players) => set({ players }),
+      setPlayers: (players) => set({ players: players }),
       fetchPlayers: () => {
         const storedPlayers = JSON.parse(
           localStorage.getItem(PLAYER_KEY) || "[]"
         );
-        set({ players: storedPlayers });
+        set({ players: storedPlayers.state?.players ?? [] });
       },
       addPlayer: (player) =>
         set((state) => {

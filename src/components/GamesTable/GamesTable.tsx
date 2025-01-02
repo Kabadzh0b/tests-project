@@ -31,6 +31,8 @@ const GamesTable = () => {
     setModalVisible(false);
   };
 
+  console.log("GAMES", games);
+
   return (
     <ScrollView horizontal style={styles.container}>
       <View style={styles.container}>
