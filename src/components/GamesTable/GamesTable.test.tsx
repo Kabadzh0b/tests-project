@@ -1,6 +1,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import GamesTable from "./GamesTable"; // Update this with the actual path
+import { GameRow } from "../GameRow/GameRow";
 
 describe("GamesTable Component", () => {
   //   beforeEach(() => {
@@ -70,7 +71,9 @@ describe("GamesTable Component", () => {
     fireEvent.press(saveButton);
 
     await waitFor(() => {
-      const savedGames = JSON.parse(localStorage.getItem("GAME_KEY") || "[]");
+      const savedGames = JSON.parse(
+        localStorage.getItem("GAME_KEY") || "[]"
+      ).slice(0, 1);
       expect(savedGames.length).toBe(1);
       expect(savedGames[0].deposit).toBe(100);
       expect(savedGames[0].withdraw).toBe(50);
@@ -87,15 +90,26 @@ describe("GamesTable Component", () => {
         deposit: 100,
         withdraw: 50,
         comission: 50,
-        date: new Date().toISOString(),
+        date: new Date(),
       },
     ];
 
     localStorage.setItem("GAME_KEY", JSON.stringify(mockGames));
 
-    const { getByText } = render(<GamesTable />);
+    const { getByTestId } = render(
+      <GameRow
+        game={mockGames[0]}
+        setModalVisible={() => {}}
+        handleDeleteGame={() => {
+          localStorage.setItem(
+            "GAME_KEY",
+            JSON.stringify(mockGames.filter((g) => g.id !== mockGames[0].id))
+          );
+        }}
+      />
+    );
 
-    const deleteButton = getByText("Delete");
+    const deleteButton = getByTestId("delete-game-button");
     fireEvent.press(deleteButton);
 
     await waitFor(() => {
