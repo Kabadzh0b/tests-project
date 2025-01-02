@@ -31,8 +31,6 @@ const GamesTable = () => {
     setModalVisible(false);
   };
 
-  console.log("GAMES", games);
-
   return (
     <ScrollView horizontal style={styles.container}>
       <View style={styles.container}>
@@ -134,6 +132,7 @@ const GamesTable = () => {
                   </View>
                   <View style={styles.metricCell}>
                     <TextInput
+                      testID="deposit-input"
                       value={String(player.deposit)}
                       onChangeText={(text) => {
                         const isValid = text.match(/^\d+$/) !== null;
@@ -154,6 +153,7 @@ const GamesTable = () => {
                   </View>
                   <View style={styles.metricCell}>
                     <TextInput
+                      testID="withdraw-input"
                       value={String(player.withdraw)}
                       onChangeText={(text) => {
                         const isValid = text.match(/^\d+$/) !== null;

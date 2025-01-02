@@ -17,7 +17,6 @@ export const useGameStore = create<GameStore>()(
       games: [],
       fetchGames: () => {
         const storedGames = JSON.parse(localStorage.getItem(GAME_KEY) || "[]");
-        console.log("storedGames", storedGames);
         set({ games: storedGames.state?.games ?? [] });
       },
       setGames: (games) => set({ games }),

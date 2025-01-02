@@ -21,12 +21,12 @@ export const usePlayerStore = create<PlayerStore>()(
         const storedPlayers = JSON.parse(
           localStorage.getItem(PLAYER_KEY) || "[]"
         );
-        set({ players: storedPlayers.state?.players ?? [] });
+        set({ players: storedPlayers ?? [] });
       },
       addPlayer: (player) =>
         set((state) => {
           const updatedPlayers = [...state.players, player];
-          localStorage.setItem("PLAYER_KEY", JSON.stringify(updatedPlayers));
+          localStorage.setItem(PLAYER_KEY, JSON.stringify(updatedPlayers));
           return { players: updatedPlayers };
         }),
       editPlayer: (playerId, updatedPlayer) =>
@@ -34,7 +34,7 @@ export const usePlayerStore = create<PlayerStore>()(
           const updatedPlayers = state.players.map((player) =>
             player.id === playerId ? { ...player, ...updatedPlayer } : player
           );
-          localStorage.setItem("PLAYER_KEY", JSON.stringify(updatedPlayers));
+          localStorage.setItem(PLAYER_KEY, JSON.stringify(updatedPlayers));
           return { players: updatedPlayers };
         }),
       deletePlayer: (playerId) =>
@@ -42,7 +42,7 @@ export const usePlayerStore = create<PlayerStore>()(
           const updatedPlayers = state.players.filter(
             (player) => player.id !== playerId
           );
-          localStorage.setItem("PLAYER_KEY", JSON.stringify(updatedPlayers));
+          localStorage.setItem(PLAYER_KEY, JSON.stringify(updatedPlayers));
           return { players: updatedPlayers };
         }),
     }),
