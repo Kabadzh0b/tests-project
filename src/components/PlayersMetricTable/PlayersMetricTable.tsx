@@ -109,12 +109,14 @@ export const PlayersMetricsTable = () => {
                     },
                   ]}
                   onPress={() => setModalVisible(player.id)}
+                  testID={`${player.name}-edit-player-button`}
                 >
                   <Text style={styles.metricText}>Edit</Text>
                 </Pressable>
                 <Pressable
                   style={[styles.button, { backgroundColor: "#FF5555" }]}
                   onPress={() => handleDeletePlayer(player.id)}
+                  testID={`${player.name}-delete-player-button`}
                 >
                   <Text style={styles.metricText}>Delete</Text>
                 </Pressable>
@@ -158,6 +160,7 @@ export const PlayersMetricsTable = () => {
                 onChangeText={(text) => setPlayerNameValue(text)}
                 style={{ fontSize: 16, fontWeight: "bold" }}
                 placeholder="Enter player name"
+                testID="player-name-input"
               />
             </View>
             <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>

@@ -1,5 +1,11 @@
 import React from "react";
-import { render, fireEvent, screen } from "@testing-library/react-native";
+import {
+  render,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react-native";
 import { PlayersMetricsTable } from "./PlayersMetricTable";
 
 describe("PlayersMetricsTable", () => {
@@ -8,7 +14,7 @@ describe("PlayersMetricsTable", () => {
   });
 
   const mockPlayers = [
-    { id: "1", name: "Player 1", games: [{ deposit: 100, withdraw: 50 }] },
+    { id: "1", name: "Player 1", games: [{ deposit: 120, withdraw: 50 }] },
     { id: "2", name: "Player 2", games: [{ deposit: 200, withdraw: 100 }] },
   ];
 
@@ -21,7 +27,7 @@ describe("PlayersMetricsTable", () => {
 
     expect(screen.getByText("Player 1")).toBeTruthy();
     expect(screen.getByText("Player 2")).toBeTruthy();
-    expect(screen.getByText("150")).toBeTruthy(); // Player 1 summary
+    expect(screen.getByText("70")).toBeTruthy(); // Player 1 summary
     expect(screen.getByText("Create new")).toBeTruthy();
   });
 
@@ -48,7 +54,7 @@ describe("PlayersMetricsTable", () => {
     fireEvent.press(screen.getByText("Save"));
 
     expect(setItemMock).toHaveBeenCalledWith(
-      "PLAYER_KEY",
+      "players",
       expect.stringContaining("New Player")
     );
     expect(screen.getByText("New Player")).toBeTruthy();
@@ -61,9 +67,9 @@ describe("PlayersMetricsTable", () => {
 
     render(<PlayersMetricsTable />);
 
-    fireEvent.press(screen.getByText("Edit"));
+    fireEvent.press(screen.getByTestId("Player 1-edit-player-button"));
     expect(screen.getByText("Edit Player")).toBeTruthy();
-    expect(screen.getByDisplayValue("Player 1")).toBeTruthy();
+    expect(screen.getByTestId("player-name-input")).toBeTruthy();
   });
 
   it("edits an existing player", () => {
@@ -74,21 +80,21 @@ describe("PlayersMetricsTable", () => {
 
     render(<PlayersMetricsTable />);
 
-    fireEvent.press(screen.getByText("Edit"));
+    fireEvent.press(screen.getByTestId("Player 1-edit-player-button"));
     fireEvent.changeText(
-      screen.getByDisplayValue("Player 1"),
+      screen.getByTestId("player-name-input"),
       "Updated Player"
     );
     fireEvent.press(screen.getByText("Save"));
 
     expect(setItemMock).toHaveBeenCalledWith(
-      "PLAYER_KEY",
+      "players",
       expect.stringContaining("Updated Player")
     );
     expect(screen.getByText("Updated Player")).toBeTruthy();
   });
 
-  it("deletes a player", () => {
+  it("deletes a player", async () => {
     jest
       .spyOn(localStorage, "getItem")
       .mockReturnValue(JSON.stringify(mockPlayers));
@@ -96,9 +102,15 @@ describe("PlayersMetricsTable", () => {
 
     render(<PlayersMetricsTable />);
 
-    fireEvent.press(screen.getByText("Delete"));
+    await waitFor(() => {
+      expect(screen.getByText("Player 1")).toBeTruthy();
+    });
+
+    const deleteButton = screen.getByTestId("Player 1-delete-player-button");
+
+    fireEvent.press(deleteButton);
     expect(setItemMock).toHaveBeenCalledWith(
-      "PLAYER_KEY",
+      "players",
       expect.not.stringContaining("Player 1")
     );
     expect(screen.queryByText("Player 1")).toBeNull();

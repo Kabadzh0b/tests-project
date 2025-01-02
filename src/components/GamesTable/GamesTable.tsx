@@ -2,45 +2,33 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Modal } from "react-native";
 import { Pressable, TextInput } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
-
-import { updatePlayers, getGame } from "./GamesTable.utils";
-import { PLAYER_KEY, GAME_KEY } from "../../../constants";
+import { useGameStore } from "../../stores/gameStore";
+import { getGame, updatePlayers } from "./GamesTable.utils";
 import { styles } from "./GamesTable.styles";
-import { Game, Player, GamePlayerInput } from "src/types";
 import { GameRow } from "../GameRow/GameRow";
+import { GamePlayerInput } from "src/types";
+import { usePlayerStore } from "../../stores/playersStore";
 
 const headerMetrics = ["Deposit", "Withdraw", "Comission"];
 
 const GamesTable = () => {
   const [modalVisible, setModalVisible] = useState<boolean | string>(false);
+  const [enteredPlayers, setEnteredPlayers] = useState<GamePlayerInput[]>([]);
+
+  const { games, fetchGames, addGame, deleteGame } = useGameStore();
+
+  const { players, setPlayers, fetchPlayers } = usePlayerStore();
 
   useEffect(() => {
-    const fetchedPlayers: Player[] = JSON.parse(
-      localStorage.getItem(PLAYER_KEY) || "[]"
-    );
-    const fetchedGames: Game[] = JSON.parse(
-      localStorage.getItem(GAME_KEY) || "[]"
-    );
-    setPlayers(fetchedPlayers);
-    setGames(fetchedGames);
+    fetchGames();
+    fetchPlayers();
   }, []);
-
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [enteredPlayers, setEnteredPlayers] = useState<GamePlayerInput[]>([]);
 
   const handleSaveGame = () => {
     const newGame = getGame(enteredPlayers);
     updatePlayers(players, newGame, setPlayers);
-    localStorage.setItem(GAME_KEY, JSON.stringify([...games, newGame]));
-    setGames([...games, newGame]);
+    addGame(newGame);
     setModalVisible(false);
-  };
-
-  const handleDeleteGame = (gameId: string) => {
-    const updatedGames = games.filter((game) => game.id !== gameId);
-    localStorage.setItem(GAME_KEY, JSON.stringify(updatedGames));
-    setGames(updatedGames);
   };
 
   return (
@@ -70,11 +58,13 @@ const GamesTable = () => {
 
         {games.map((game) => (
           <GameRow
+            key={game.id}
             game={game}
             setModalVisible={setModalVisible}
-            handleDeleteGame={() => handleDeleteGame(game.id)}
+            handleDeleteGame={() => deleteGame(game.id)}
           />
         ))}
+
         <Modal
           visible={!!modalVisible}
           transparent

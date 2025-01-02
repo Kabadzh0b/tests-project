@@ -4,7 +4,7 @@ import { PLAYER_KEY } from "../../../constants";
 export const updatePlayers = (
   players: Player[],
   game: Game,
-  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>
+  setPlayers: (players: Player[]) => void
 ) => {
   const gamePlayers = game.players;
   players.forEach((p) => {
