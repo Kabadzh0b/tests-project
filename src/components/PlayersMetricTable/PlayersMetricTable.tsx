@@ -1,19 +1,26 @@
 import { PLAYER_KEY } from "../../../constants";
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Modal } from "react-native";
-import { Pressable, TextInput } from "react-native-gesture-handler";
-import { Player } from "src/types";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Modal,
+  Pressable,
+  TextInput,
+} from "react-native";
+import { usePlayerStore } from "src/stores/playersStore";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
 
 export const PlayersMetricsTable = () => {
   const [modalVisible, setModalVisible] = useState<boolean | string>(false);
-  const fetchedPlayers: Player[] = JSON.parse(
-    localStorage.getItem(PLAYER_KEY) || "[]"
-  );
-  // state for rerendering the table
-  const [players, setPlayers] = useState<Player[]>(fetchedPlayers);
+  const { players, setPlayers, fetchPlayers } = usePlayerStore();
   const [playerNameValue, setPlayerNameValue] = useState<string>("");
+
+  useEffect(() => {
+    fetchPlayers();
+  }, []);
 
   const handleSavePlayer = () => {
     if (modalVisible === true) {

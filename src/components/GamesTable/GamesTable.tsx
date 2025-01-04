@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Modal } from "react-native";
-import { Pressable, TextInput } from "react-native-gesture-handler";
+import {
+  View,
+  Text,
+  ScrollView,
+  Modal,
+  Pressable,
+  TextInput,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useGameStore } from "../../stores/gameStore";
 import { getGame, updatePlayers } from "./GamesTable.utils";
