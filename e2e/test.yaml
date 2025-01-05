@@ -1,0 +1,4 @@
+appId: com.kabadzh0b.testsproject
+---
+- launchApp
+- assertVisible: "Welcome!"

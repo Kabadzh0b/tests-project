@@ -3,12 +3,13 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import GamesTable from "./GamesTable";
 import { GameRow } from "../GameRow/GameRow";
 import { PLAYER_KEY, GAME_KEY } from "../../../constants";
+import AsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 
 describe("GamesTable Component", () => {
-  //   beforeEach(() => {
-  //     // Clear localStorage mock before each test
-  //     localStorage.clear();
-  //   });
+  beforeEach(() => {
+    // Clear AsyncStorage mock before each test
+    AsyncStorage.clear();
+  });
 
   it("renders correctly", () => {
     const { getByText } = render(<GamesTable />);
@@ -43,14 +44,14 @@ describe("GamesTable Component", () => {
     });
   });
 
-  // Will work when we'll add a Zustand to the project instead of using only localStorage
+  // Will work when we'll add a Zustand to the project instead of using only AsyncStorage
   it("saves a new game when 'Save' button is pressed", async () => {
     const mockPlayers = [
       { id: "1", name: "Player 1", games: [] },
       { id: "2", name: "Player 2", games: [] },
     ];
 
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(mockPlayers));
+    AsyncStorage.setItem(PLAYER_KEY, JSON.stringify(mockPlayers));
 
     const { getByText, getByTestId } = render(<GamesTable />);
 
@@ -61,6 +62,8 @@ describe("GamesTable Component", () => {
     const addPlayerButton = getByText("Add New Player");
     fireEvent.press(addPlayerButton);
 
+    
+
     const depositInput = getByTestId("deposit-input");
     const withdrawInput = getByTestId("withdraw-input");
 
@@ -70,9 +73,9 @@ describe("GamesTable Component", () => {
     const saveButton = getByText("Save");
     fireEvent.press(saveButton);
 
-    await waitFor(() => {
-      const savedGames =
-        JSON.parse(localStorage.getItem(GAME_KEY) ?? "[]").state?.games ?? [];
+    await waitFor(async () => {
+      const value = await AsyncStorage.getItem(GAME_KEY);
+      const savedGames = value ? JSON.parse(value ?? "[]") : [];
       expect(savedGames.length).toBe(1);
       expect(savedGames[0].deposit).toBe(100);
       expect(savedGames[0].withdraw).toBe(50);
@@ -91,14 +94,14 @@ describe("GamesTable Component", () => {
       },
     ];
 
-    localStorage.setItem("GAME_KEY", JSON.stringify(mockGames));
+    AsyncStorage.setItem("GAME_KEY", JSON.stringify(mockGames));
 
     const { getByTestId } = render(
       <GameRow
         game={mockGames[0]}
         setModalVisible={() => {}}
         handleDeleteGame={() => {
-          localStorage.setItem(
+          AsyncStorage.setItem(
             "GAME_KEY",
             JSON.stringify(mockGames.filter((g) => g.id !== mockGames[0].id))
           );
@@ -109,8 +112,9 @@ describe("GamesTable Component", () => {
     const deleteButton = getByTestId("delete-game-button");
     fireEvent.press(deleteButton);
 
-    await waitFor(() => {
-      const savedGames = JSON.parse(localStorage.getItem("GAME_KEY") || "[]");
+    await waitFor(async () => {
+      const value = await AsyncStorage.getItem("GAME_KEY");
+      const savedGames = value ? JSON.parse(value ?? "[]") : [];
       expect(savedGames.length).toBe(0);
     });
   });

@@ -7,10 +7,11 @@ import {
   within,
 } from "@testing-library/react-native";
 import { PlayersMetricsTable } from "./PlayersMetricTable";
+import AsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 
 describe("PlayersMetricsTable", () => {
   beforeEach(() => {
-    localStorage.clear();
+    AsyncStorage.clear();
   });
 
   const mockPlayers = [
@@ -19,10 +20,6 @@ describe("PlayersMetricsTable", () => {
   ];
 
   it("renders the table with players and metrics", () => {
-    jest
-      .spyOn(localStorage, "getItem")
-      .mockReturnValue(JSON.stringify(mockPlayers));
-
     render(<PlayersMetricsTable />);
 
     expect(screen.getByText("Player 1")).toBeTruthy();
@@ -32,8 +29,6 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("opens the modal to create a new player", () => {
-    jest.spyOn(localStorage, "getItem").mockReturnValue(JSON.stringify([]));
-
     render(<PlayersMetricsTable />);
 
     fireEvent.press(screen.getByText("Create new"));
@@ -41,8 +36,7 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("adds a new player", () => {
-    jest.spyOn(localStorage, "getItem").mockReturnValue(JSON.stringify([]));
-    const setItemMock = jest.spyOn(localStorage, "setItem");
+    const setItemMock = jest.spyOn(AsyncStorage, "setItem");
 
     render(<PlayersMetricsTable />);
 
@@ -61,10 +55,6 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("opens the modal to edit a player", () => {
-    jest
-      .spyOn(localStorage, "getItem")
-      .mockReturnValue(JSON.stringify(mockPlayers));
-
     render(<PlayersMetricsTable />);
 
     fireEvent.press(screen.getByTestId("Player 1-edit-player-button"));
@@ -73,10 +63,7 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("edits an existing player", () => {
-    jest
-      .spyOn(localStorage, "getItem")
-      .mockReturnValue(JSON.stringify(mockPlayers));
-    const setItemMock = jest.spyOn(localStorage, "setItem");
+    const setItemMock = jest.spyOn(AsyncStorage, "setItem");
 
     render(<PlayersMetricsTable />);
 
@@ -95,10 +82,7 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("deletes a player", async () => {
-    jest
-      .spyOn(localStorage, "getItem")
-      .mockReturnValue(JSON.stringify(mockPlayers));
-    const setItemMock = jest.spyOn(localStorage, "setItem");
+    const setItemMock = jest.spyOn(AsyncStorage, "setItem");
 
     render(<PlayersMetricsTable />);
 
@@ -117,8 +101,6 @@ describe("PlayersMetricsTable", () => {
   });
 
   it("closes the modal when cancel is pressed", () => {
-    jest.spyOn(localStorage, "getItem").mockReturnValue(JSON.stringify([]));
-
     render(<PlayersMetricsTable />);
 
     fireEvent.press(screen.getByText("Create new"));

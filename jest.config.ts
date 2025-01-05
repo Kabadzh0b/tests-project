@@ -2,7 +2,7 @@ import type { Config } from "jest";
 
 const config: Config = {
   verbose: true,
-  setupFiles: ["jest-localstorage-mock"],
+  setupFiles: ["./jest.setup.ts"],
   preset: "jest-expo",
 };
 

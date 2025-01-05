@@ -9,7 +9,8 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import { usePlayerStore } from "src/stores/playersStore";
+import { usePlayerStore } from "../../stores/playersStore";
+import AsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 
 const headerMetrics = ["Deposit", "Withdraw", "Summary"];
 
@@ -29,7 +30,7 @@ export const PlayersMetricsTable = () => {
         name: playerNameValue,
         games: [],
       };
-      localStorage.setItem(PLAYER_KEY, JSON.stringify([...players, newPlayer]));
+      AsyncStorage.setItem(PLAYER_KEY, JSON.stringify([...players, newPlayer]));
       setPlayers([...players, newPlayer]);
       setModalVisible(false);
       return;
@@ -41,14 +42,14 @@ export const PlayersMetricsTable = () => {
       }
       return p;
     });
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
+    AsyncStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
     setPlayers(newPlayers);
     setModalVisible(false);
   };
 
   const handleDeletePlayer = (playerId: string) => {
     const newPlayers = players.filter((p) => p.id !== playerId);
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
+    AsyncStorage.setItem(PLAYER_KEY, JSON.stringify(newPlayers));
     setPlayers(newPlayers);
     setModalVisible(false);
   };
